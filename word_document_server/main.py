@@ -1125,11 +1125,13 @@ def register_tools():
         start_at: dict = None,
         level_map: dict = None,
         track_changes: bool = False,
+        font_color: str = None,
     ):
         return live_tools.word_live_apply_list(
             filename, start_paragraph, end_paragraph, list_type,
             level, remove, continue_previous, number_format,
             number_style, start_at, level_map, track_changes,
+            font_color,
         )
 
     @mcp.tool(
