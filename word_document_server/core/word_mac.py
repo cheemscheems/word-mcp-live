@@ -1309,7 +1309,7 @@ for (var i = 0; i < paras.length; i++) {{
             level = 3;
         }} else {{
             var ch = raw.charAt(0);
-            if (ch >= ‘a’ && ch <= ‘z’ && romanChars.indexOf(ch) === -1 && /^[a-z]\\)[\\s\\t]/.test(raw)) {{
+            if (ch >= "a" && ch <= "z" && romanChars.indexOf(ch) === -1 && /^[a-z]\\)[\\s\\t]/.test(raw)) {{
                 level = 3;
             }}
         }}
