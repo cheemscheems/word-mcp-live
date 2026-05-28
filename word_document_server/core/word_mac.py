@@ -1229,31 +1229,48 @@ JSON.stringify({{removed: true, count: bodyCount}});
         # Clear list formatting from header/footer stories via VBA (do Visual Basic).
         # JXA's sec.headers[...] / sec.footers[...] accessors don't reliably return
         # HeaderFooter objects, but VBA's Sections collection works cleanly.
+        # The VBA writes its iteration count into the clipboard so AppleScript
+        # can read it back (Variables(...) round-trip requires quoting that
+        # breaks AppleScript's `do Visual Basic` string literal).
         try:
-            hf_result = _run_applescript("""
-tell application "Microsoft Word"
-    do Visual Basic "
-Dim sec As Section
-Dim hf As HeaderFooter
-Dim n As Long
-n = 0
-For Each sec In ActiveDocument.Sections
-    For Each hf In sec.Footers
-        hf.Range.ListFormat.RemoveNumbers
-        n = n + 1
-    Next
-    For Each hf In sec.Headers
-        hf.Range.ListFormat.RemoveNumbers
-        n = n + 1
-    Next
-Next
-ActiveDocument.Variables(\\"_lastHFCleared\\").Value = CStr(n)
-"
-    set rawN to (do Visual Basic "ActiveDocument.Variables(\"_lastHFCleared\").Value")
-    return rawN
-end tell
-""", timeout=30)
-            hf_cleared = int(hf_result.strip() or "0")
+            # VBA source (write a flag file so AppleScript doesn't have to
+            # round-trip the count through a string-quoted Variables() call).
+            vba_lines = [
+                "Dim sec As Section",
+                "Dim hf As HeaderFooter",
+                "Dim n As Long: n = 0",
+                "For Each sec In ActiveDocument.Sections",
+                "    For Each hf In sec.Footers",
+                "        hf.Range.ListFormat.RemoveNumbers",
+                "        n = n + 1",
+                "    Next",
+                "    For Each hf In sec.Headers",
+                "        hf.Range.ListFormat.RemoveNumbers",
+                "        n = n + 1",
+                "    Next",
+                "Next",
+                "Dim fileNum As Integer: fileNum = FreeFile",
+                'Open "/tmp/_word_hf_cleared.txt" For Output As #fileNum',
+                "Print #fileNum, CStr(n)",
+                "Close #fileNum",
+            ]
+            # Build a single-line VBA program (do Visual Basic accepts colon
+            # separators between statements). Then escape every literal " as ""
+            # for AppleScript's nested string literal.
+            vba_program = ": ".join(vba_lines)
+            as_escaped = vba_program.replace('"', '""')
+            applescript = (
+                'tell application "Microsoft Word"\n'
+                f'    do Visual Basic "{as_escaped}"\n'
+                'end tell\n'
+            )
+            _run_applescript(applescript, timeout=30)
+            try:
+                with open("/tmp/_word_hf_cleared.txt") as f:
+                    hf_cleared = int(f.read().strip())
+                os.remove("/tmp/_word_hf_cleared.txt")
+            except Exception:
+                hf_cleared = -1
         except Exception as e:
             hf_cleared = 0
             body_data["headerFooterError"] = str(e)[:200]
