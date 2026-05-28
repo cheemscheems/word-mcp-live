@@ -1275,12 +1275,15 @@ var romanChars = "ivxlcdm";
 var normalizedMap = {{}};
 for (var key in headingMap) normalizedMap[norm(key)] = headingMap[key];
 var paras = d.paragraphs();
+var paraCount = paras.length;
+// Batch-read all paragraph texts in one Apple Event (~30x faster than per-para reads)
+var paraTexts = paras.textObject.content();
 var counts = [0, 0, 0, 0];
 var totalApplied = 0;
 var firstH1 = -1;
 
-for (var i = 0; i < paras.length; i++) {{
-    var raw = paras[i].textObject.content().replace(/[\\r\\n]/g, "");
+for (var i = 0; i < paraCount; i++) {{
+    var raw = (paraTexts[i] || "").replace(/[\\r\\n]/g, "");
     if (raw.length === 0) continue;
     var pText = norm(raw);
     var pTextNoNum = norm(raw.replace(numPrefixRe, ""));
@@ -1341,7 +1344,7 @@ for (var i = (firstH1 >= 0 ? firstH1 : 0); i < paras.length; i++) {{
 }}
 """}
 JSON.stringify({{applied: true, type: "multilevel", h1: counts[1], h2: counts[2], h3: counts[3]}});
-""", timeout=180)
+""", timeout=600)
 
         elif heading_texts:
             texts_json = json.dumps(heading_texts)
