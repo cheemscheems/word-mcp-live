@@ -262,20 +262,29 @@ JSON.stringify({{undone: {times}, results: results}});
 # ── Read ─────────────────────────────────────────────────────────────────
 
 
-def mac_get_text(filename: str = None) -> str:
-    """Get all paragraph text from document."""
+def mac_get_text(filename: str = None, timeout: int = 120) -> str:
+    """Get all paragraph text from document.
+
+    Reads the entire document text as a single string (one AppleEvent call)
+    then splits by \\r in Python to recover paragraphs. This is ~10-100x
+    faster than iterating paragraphs[i].textObject.content() per paragraph
+    when Word/OneDrive is slow.
+    """
     finder = _doc_finder_js(filename)
-    return _run_jxa(f"""
+    bulk_result = _run_jxa(f"""
 var app = Application("Microsoft Word");
 {finder}
-var paras = d.paragraphs();
-var result = [];
-for (var i = 0; i < paras.length; i++) {{
-    var text = paras[i].textObject.content();
-    result.push({{index: i, text: text}});
-}}
-JSON.stringify({{paragraphs: result, count: result.length}});
-""")
+JSON.stringify({{text: d.textObject.content()}});
+""", timeout=timeout)
+    bulk_text = json.loads(bulk_result).get("text", "")
+    # Word paragraphs are separated by \r in d.textObject.content()
+    parts = bulk_text.split("\r")
+    # Word's paragraphs collection includes a trailing empty paragraph; drop the
+    # last split entry if it's empty (would create a phantom paragraph at the end).
+    if parts and parts[-1] == "":
+        parts = parts[:-1]
+    paras = [{"index": i, "text": text + "\r"} for i, text in enumerate(parts)]
+    return json.dumps({"paragraphs": paras, "count": len(paras)}, ensure_ascii=False)
 
 
 def mac_get_page_text(filename: str = None, page: int = 1, end_page: int = None) -> str:
@@ -1193,16 +1202,53 @@ def mac_apply_list(
     finder = _doc_finder_js(filename)
 
     if remove:
+        # Bulk removal: build ONE range spanning all target paragraphs, call
+        # removeNumbers once. Avoids per-paragraph AppleEvent overhead.
+        # Also clear list formatting from header/footer stories so old list
+        # templates with linkedStyle="Normal" don't bleed list markers into
+        # those areas of the document.
         return _run_jxa(f"""
 var app = Application("Microsoft Word");
 {finder}
-for (var i = {start_paragraph - 1}; i < {ep}; i++) {{
-    var p = d.paragraphs[i];
-    var r = d.createRange({{start: p.textObject.startOfContent(), end: p.textObject.endOfContent()}});
+var paraCount = d.paragraphs.length;
+var startIdx = {start_paragraph - 1};
+var endIdx = Math.min({ep}, paraCount);
+if (startIdx < 0) startIdx = 0;
+var bodyCount = 0;
+if (endIdx > startIdx) {{
+    var startPara = d.paragraphs[startIdx];
+    var endPara = d.paragraphs[endIdx - 1];
+    var r = d.createRange({{
+        start: startPara.textObject.startOfContent(),
+        end: endPara.textObject.endOfContent()
+    }});
     r.listFormat.removeNumbers();
+    bodyCount = endIdx - startIdx;
 }}
-JSON.stringify({{removed: true, count: {ep - start_paragraph + 1}}});
-""")
+// Clear list formatting from header/footer story ranges across all sections.
+// These are stored separately from main body paragraphs and don't get touched
+// by removeNumbers on main body range.
+var headerFooterCleared = 0;
+try {{
+    var sections = d.sections();
+    for (var si = 0; si < sections.length; si++) {{
+        var sec = sections[si];
+        var headerTypes = ["primary header", "first page header", "even pages header"];
+        var footerTypes = ["primary footer", "first page footer", "even pages footer"];
+        var headerFooterNames = headerTypes.concat(footerTypes);
+        for (var hi = 0; hi < headerFooterNames.length; hi++) {{
+            try {{
+                var hf = (hi < 3) ? sec.headers[headerFooterNames[hi]] : sec.footers[headerFooterNames[hi]];
+                if (hf && hf.textObject) {{
+                    hf.textObject.listFormat.removeNumbers();
+                    headerFooterCleared++;
+                }}
+            }} catch(eh) {{}}
+        }}
+    }}
+}} catch(eg) {{}}
+JSON.stringify({{removed: true, count: bodyCount, headerFooterCleared: headerFooterCleared}});
+""", timeout=120)
 
     if list_type == "multilevel":
         nf = dict(number_format or {"1": "%1.", "2": "%1.%2."})
@@ -1227,6 +1273,9 @@ JSON.stringify({{removed: true, count: {ep - start_paragraph + 1}}});
             sa_val = sa.get(str(lvl), sa.get(lvl, 1))
             indent = 28 * (lvl - 1)
             text_indent = indent + 28 if lvl > 1 else 0
+            # restartAfter: Level N restarts counter when level (N-1) increments.
+            # Level 1 never restarts. Level 2 restarts after Level 1. Level 3 restarts after Level 2.
+            restart_after = lvl - 1 if lvl > 1 else 0
             levels_js += f"""
     var lv{lvl} = lt.listLevels[{lvl - 1}];
     lv{lvl}.numberFormat = "{_escape_js(fmt)}";
@@ -1234,7 +1283,7 @@ JSON.stringify({{removed: true, count: {ep - start_paragraph + 1}}});
     lv{lvl}.startAt = {sa_val};
     lv{lvl}.numberPosition = {indent};
     lv{lvl}.textPosition = {text_indent};
-    lv{lvl}.linkedStyle = "Normal";
+    try {{ lv{lvl}.restartAfter = {restart_after}; }} catch(e) {{}}
 """
         default_lvl = level + 1 if level > 0 else 1
 
@@ -1261,89 +1310,117 @@ JSON.stringify({{removed: true, count: {ep - start_paragraph + 1}}});
                     heading_texts = [str(v) for v in lm.values()]
 
         if heading_level_map:
-            map_json = json.dumps(heading_level_map, ensure_ascii=False)
+            # Hybrid approach: do text matching in Python (avoids JXA AppleEvent
+            # timeout on long iterations), then send numeric indices to a fast JXA.
+            import re as _re
+            paras_data = json.loads(mac_get_text(filename=filename)).get("paragraphs", [])
+
+            _quote_chars = [chr(0x2018), chr(0x2019), chr(0x201c), chr(0x201d), chr(0x22)]
+            def _norm_text(s: str) -> str:
+                s = s.upper()
+                for c in _quote_chars:
+                    s = s.replace(c, "'")
+                return _re.sub(r"\s+", " ", s).strip()
+
+            num_prefix_re = _re.compile(r"^\s*\d{1,2}\.\d{1,2}[\.:]?[\s\t]*")
+            letter_a_re = _re.compile(r"^\([a-zğüşıöç]\)[\s\t]")
+            letter_b_re = _re.compile(r"^[a-z]\)[\s\t]")
+            roman_chars = set("ivxlcdm")
+
+            # Build normalized heading map (text → level)
+            norm_map = {_norm_text(k): v for k, v in heading_level_map.items()}
+
+            # Match paragraphs (text → level)
+            indices_levels = []  # list of (para_idx, level)
+            content_changes = {}  # {para_idx: new_content_without_prefix}
+            first_h1_idx = -1
+            for pdata in paras_data:
+                idx = pdata.get("index", -1)
+                raw = (pdata.get("text") or "").replace("\r", "").replace("\n", "")
+                if not raw:
+                    continue
+                p_text = _norm_text(raw)
+                p_text_no_num = _norm_text(num_prefix_re.sub("", raw))
+                level = 0
+                matched_key = None
+
+                if p_text in norm_map:
+                    level = norm_map[p_text]; matched_key = p_text
+                elif p_text_no_num != p_text and p_text_no_num in norm_map:
+                    level = norm_map[p_text_no_num]; matched_key = p_text_no_num
+                else:
+                    for key in list(norm_map.keys()):
+                        if p_text.startswith(key) or (p_text_no_num != p_text and p_text_no_num.startswith(key)):
+                            level = norm_map[key]; matched_key = key; break
+
+                # Auto-detect Level 3 lettered items (only after first L1 heading)
+                if level == 0 and first_h1_idx >= 0 and len(raw) > 10:
+                    if letter_a_re.match(raw):
+                        level = 3
+                    elif letter_b_re.match(raw):
+                        ch = raw[0]
+                        if ch not in roman_chars:
+                            level = 3
+
+                if level > 0:
+                    if matched_key:
+                        del norm_map[matched_key]
+                    if level >= 2 and num_prefix_re.match(raw):
+                        content_changes[idx] = num_prefix_re.sub("", raw)
+                    if level == 3:
+                        stripped3 = _re.sub(r"^\(?[a-zğüşıöç]\)[\s\t]*", "", content_changes.get(idx, raw))
+                        if stripped3 != content_changes.get(idx, raw):
+                            content_changes[idx] = stripped3
+                    indices_levels.append((idx, level))
+                    if level == 1 and first_h1_idx < 0:
+                        first_h1_idx = idx
+
+            indices_levels_json = json.dumps(indices_levels)
+            content_changes_json = json.dumps(
+                {str(k): v for k, v in content_changes.items()},
+                ensure_ascii=False,
+            )
+            first_h1_js = first_h1_idx if first_h1_idx >= 0 else 0
+            color_block = ""
+            if font_color:
+                color_block = f"""
+var fc = {_color_to_mac_rgb(font_color)};
+for (var ci = 0; ci < indices.length; ci++) {{
+    try {{ paras[indices[ci][0]].textObject.fontObject.color = fc; }} catch(e) {{}}
+}}
+"""
             return _run_jxa(f"""
 var app = Application("Microsoft Word");
 {finder}
 var lt = app.make({{new: "listTemplate", at: d, withProperties: {{outlineNumbered: true}}}});
 {levels_js}
-var headingMap = {map_json};
-var norm = function(s) {{ return s.toUpperCase().replace(/[\\u2018\\u2019\\u201C\\u201D\\u0027\\u0022]/g, "\\u0027").replace(/\\s+/g, " ").trim(); }};
-var numPrefixRe = /^\\s*\\d{{1,2}}\\.\\d{{1,2}}[\\.:]?[\\s\\t]*/;
-var letterReA = /^\\([a-zğüşıöç]\\)[\\s\\t]/;
-var romanChars = "ivxlcdm";
-var normalizedMap = {{}};
-for (var key in headingMap) normalizedMap[norm(key)] = headingMap[key];
+var indices = {indices_levels_json};
+var contentChanges = {content_changes_json};
 var paras = d.paragraphs();
-var paraCount = paras.length;
-// Batch-read all paragraph texts in one Apple Event (~30x faster than per-para reads)
-var paraTexts = paras.textObject.content();
 var counts = [0, 0, 0, 0];
-var totalApplied = 0;
-var firstH1 = -1;
 
-for (var i = 0; i < paraCount; i++) {{
-    var raw = (paraTexts[i] || "").replace(/[\\r\\n]/g, "");
-    if (raw.length === 0) continue;
-    var pText = norm(raw);
-    var pTextNoNum = norm(raw.replace(numPrefixRe, ""));
-    var level = 0;
-    var matchedKey = null;
-
-    // Exact match on full text
-    if (normalizedMap[pText] !== undefined) {{
-        level = normalizedMap[pText]; matchedKey = pText;
+for (var ii = 0; ii < indices.length; ii++) {{
+    var idx = indices[ii][0];
+    var lvl = indices[ii][1];
+    if (idx < 0 || idx >= paras.length) continue;
+    var p = paras[idx];
+    var newContent = contentChanges[String(idx)];
+    if (newContent !== undefined) {{
+        p.textObject.content = newContent + "\\r";
     }}
-    // Exact match after stripping numeric prefix
-    if (level === 0 && pTextNoNum !== pText && normalizedMap[pTextNoNum] !== undefined) {{
-        level = normalizedMap[pTextNoNum]; matchedKey = pTextNoNum;
-    }}
-    // startsWith match
-    if (level === 0) {{
-        for (var key in normalizedMap) {{
-            if (pText.indexOf(key) === 0 || (pTextNoNum !== pText && pTextNoNum.indexOf(key) === 0)) {{
-                level = normalizedMap[key]; matchedKey = key; break;
-            }}
-        }}
-    }}
-    // Auto-detect (a)/(b) lettered items as Level 3, after first heading
-    if (level === 0 && firstH1 >= 0 && raw.length > 10) {{
-        if (letterReA.test(raw)) {{
-            level = 3;
-        }} else {{
-            var ch = raw.charAt(0);
-            if (ch >= "a" && ch <= "z" && romanChars.indexOf(ch) === -1 && /^[a-z]\\)[\\s\\t]/.test(raw)) {{
-                level = 3;
-            }}
-        }}
-    }}
-
-    if (level > 0) {{
-        // Strip manual prefixes for auto-numbered levels
-        if (matchedKey) delete normalizedMap[matchedKey];
-        if (level >= 2 && numPrefixRe.test(raw)) {{
-            var stripped = raw.replace(numPrefixRe, "");
-            if (stripped !== raw) {{ paras[i].textObject.content = stripped + "\\r"; }}
-        }}
-        if (level === 3) {{
-            var stripped3 = raw.replace(/^\\(?[a-zğüşıöç]\\)[\\s\\t]*/, "");
-            if (stripped3 !== raw) {{ paras[i].textObject.content = stripped3 + "\\r"; }}
-        }}
-        var r = d.createRange({{start: paras[i].textObject.startOfContent(), end: paras[i].textObject.endOfContent()}});
-        r.listFormat.applyListFormatTemplate({{listTemplate: lt, continuePreviousList: (totalApplied > 0)}});
-        if (level > 1) r.listFormat.listLevelNumber = level;
-        if (level === 1 && firstH1 < 0) firstH1 = i;
-        counts[level]++;
-        totalApplied++;
-    }}
+    var r = d.createRange({{start: p.textObject.startOfContent(), end: p.textObject.endOfContent()}});
+    // applyListFormatTemplate: only the very first application starts a new list;
+    // subsequent applications continue the existing list so Level 1 counters
+    // increment across separately-applied paragraphs.
+    r.listFormat.applyListFormatTemplate({{listTemplate: lt, continuePreviousList: (ii > 0)}});
+    // Only set explicit listLevelNumber for L2/L3. Setting it to 1 on L1
+    // paragraphs resets the L1 counter (causes "MADDE 1" twice instead of
+    // "MADDE 1" + "MADDE 2"). Word_com.py uses the same pattern.
+    if (lvl > 1) r.listFormat.listLevelNumber = lvl;
+    counts[lvl]++;
 }}
-{"" if not font_color else f"""
-var fc = {_color_to_mac_rgb(font_color)};
-for (var i = (firstH1 >= 0 ? firstH1 : 0); i < paras.length; i++) {{
-    try {{ paras[i].textObject.fontObject.color = fc; }} catch(e) {{}}
-}}
-"""}
-JSON.stringify({{applied: true, type: "multilevel", h1: counts[1], h2: counts[2], h3: counts[3]}});
+{color_block}
+JSON.stringify({{applied: true, type: "multilevel", h1: counts[1], h2: counts[2], h3: counts[3], total: indices.length}});
 """, timeout=600)
 
         elif heading_texts:
