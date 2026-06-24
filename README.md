@@ -386,6 +386,20 @@ This server runs entirely on your local machine. No data is collected, transmitt
 
 MIT License — see [LICENSE](LICENSE) for details.
 
+## Disclaimer
+
+> **⚠️ This project is provided as-is, without any warranty or guarantee of fitness for a particular purpose.**
+>
+> While security issues identified in the initial audit have been addressed, this project has **not undergone comprehensive testing** in production environments. Use of this software to modify Word documents carries inherent risks, including but not limited to:
+>
+> - **Data loss or corruption** due to unexpected errors during file operations
+> - **Document formatting issues** from automated editing
+> - **Compatibility problems** with specific Word versions or document features
+>
+> **Always maintain backups** of important documents before using this tool. The automatic backup feature (stored in `_backup/` folders) provides a safety net, but should not be relied upon as your sole backup strategy.
+>
+> By using this software, you acknowledge that you understand and accept these risks.
+
 ## Star History
 
 <a href="https://star-history.com/#ykarapazar/word-mcp-live&Date">
