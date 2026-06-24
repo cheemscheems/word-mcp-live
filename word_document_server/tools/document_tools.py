@@ -223,3 +223,19 @@ async def merge_documents(target_filename: str, source_filenames: List[str], add
 async def get_document_xml_tool(filename: str) -> str:
     """Get the raw XML structure of a Word document."""
     return get_document_xml(filename)
+
+
+async def backup_document(filename: str, note: str = None) -> str:
+    """Create a backup copy of a Word document.
+
+    Backups are stored in a ``_backup`` folder next to the source file.
+
+    Args:
+        filename: Path to the document to back up.
+        note:     Optional note describing why the backup was created.
+    """
+    import json
+    from word_document_server.utils.backup_manager import backup_manager
+
+    result = backup_manager.create_backup(filename, note=note or "")
+    return json.dumps(result, ensure_ascii=False)

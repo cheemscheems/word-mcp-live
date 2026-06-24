@@ -20,6 +20,9 @@ def get_file_lock(filepath: str) -> asyncio.Lock:
     path = os.path.realpath(filepath)
     if sys.platform == "win32":
         path = path.casefold()
+    # Track file for automatic periodic backups
+    from word_document_server.utils.backup_manager import backup_manager
+    backup_manager.track(path)
     return _file_locks.setdefault(path, asyncio.Lock())
 
 

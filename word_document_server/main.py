@@ -175,7 +175,22 @@ def register_tools():
     def get_document_xml(filename: str):
         """Get the raw XML structure of a Word document."""
         return document_tools.get_document_xml_tool(filename)
-    
+
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="Backup Document",
+            readOnlyHint=True,
+        ),
+    )
+    def backup_document(filename: str, note: str = None):
+        """Create a backup copy of the document.
+
+        Use this before making large or destructive changes (encryption,
+        large-scale replace, etc.).  Backups are stored in a ``_backup``
+        folder next to the source file.
+        """
+        return document_tools.backup_document(filename, note)
+
     @mcp.tool(
         annotations=ToolAnnotations(
             title="Insert Header Near Text",
@@ -1972,6 +1987,10 @@ def run_server():
     # Monkey-patch PhysPkgReader to detect Word-locked files
     from word_document_server.utils.path_utils import install_path_hook
     install_path_hook()
+
+    # Start automatic document backup loop
+    from word_document_server.utils.backup_manager import backup_manager
+    backup_manager.start()
 
     # Register all tools
     register_tools()

@@ -20,6 +20,7 @@ These work on Windows, macOS, and Linux using python-docx. The document file mus
 | `get_document_outline` | Get document heading structure |
 | `list_available_documents` | List .docx files in a directory |
 | `get_document_xml` | Get raw OOXML structure |
+| `backup_document` | Create a backup copy (stored in `_backup/` folder) |
 
 </details>
 

@@ -465,7 +465,11 @@ async def search_and_replace(filename: str, find_text: str, replace_text: str) -
             if count > 0:
                 doc.save(filename)
         if count > 0:
-            return f"Replaced {count} occurrence(s) of '{find_text}' with '{replace_text}'."
+            msg = f"Replaced {count} occurrence(s) of '{find_text}' with '{replace_text}'."
+            if count > 50000:
+                msg += (f" 替换数量超过安全上限（50000），"
+                        "余下匹配未替换。请缩小查找范围后重试。")
+            return msg
         else:
             return f"No occurrences of '{find_text}' found."
     except Exception as e:

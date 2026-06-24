@@ -8,6 +8,7 @@ import json
 import os
 import re
 import sys
+import time
 
 from word_document_server.defaults import DEFAULT_AUTHOR
 # macOS JXA dispatch
@@ -20,6 +21,10 @@ WD_STORY = 6
 # Word COM InsertBefore/InsertAfter limit (~32K chars).
 # We use 30000 as safe margin below 2^15-1 = 32767.
 _INSERT_CHUNK_SIZE = 30000
+
+# Safety limits for find-replace operations.
+_MAX_REPLACEMENTS = 50_000   # hard ceiling on number of replacements
+_MAX_REPLACE_SEC = 30        # time budget (seconds) before truncation
 
 
 async def word_live_insert_text(
@@ -998,11 +1003,17 @@ async def word_live_replace_text(
 
             try:
                 count = 0
-                MAX_REPLACEMENTS = 50_000  # safety ceiling
+                _start_time = time.time()
+                count_truncated = False
                 rng = doc.Content.Duplicate
                 rng.Find.ClearFormatting()
 
                 while True:
+                    # Time budget check: don't block the server too long
+                    if time.time() - _start_time > _MAX_REPLACE_SEC:
+                        count_truncated = True
+                        break
+
                     found = rng.Find.Execute(
                         FindText=find_text,
                         MatchCase=match_case,
@@ -1025,7 +1036,7 @@ async def word_live_replace_text(
                     count += 1
                     if not replace_all:
                         break
-                    if count >= MAX_REPLACEMENTS:
+                    if count >= _MAX_REPLACEMENTS:
                         break
                     rng.Collapse(0)  # wdCollapseEnd — move past replacement
             finally:
@@ -1041,6 +1052,14 @@ async def word_live_replace_text(
             "replacements": count,
             "replace_all": replace_all,
             "tracked": track_changes,
+            "truncated": count_truncated,
+            "warning": (
+                f"替换已执行 {count} 次"
+                f"（耗时超过 {_MAX_REPLACE_SEC} 秒）"
+                "，剩余替换已截断。"
+                "如需替换全部，"
+                "请分批缩小范围执行。"
+            ) if count_truncated else None,
         }, ensure_ascii=False)
 
     except Exception as e:

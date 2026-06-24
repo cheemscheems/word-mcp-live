@@ -9,6 +9,7 @@ import io
 import json
 import os
 import sys
+import tempfile
 from typing import List, Optional
 
 from docx import Document
@@ -72,8 +73,20 @@ async def protect_document(
             encrypted_data_io = io.BytesIO()
             file.encrypt(password=password, outfile=encrypted_data_io)
 
-            with open(filename, "wb") as outfile:
-                outfile.write(encrypted_data_io.getvalue())
+            # Write to temp file first, then atomically replace
+            tmp_fd, tmp_path = tempfile.mkstemp(
+                suffix=".docx",
+                dir=os.path.dirname(os.path.abspath(filename)),
+            )
+            os.close(tmp_fd)
+            try:
+                with open(tmp_path, "wb") as tmp_file:
+                    tmp_file.write(encrypted_data_io.getvalue())
+                os.replace(tmp_path, filename)
+            except Exception:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+                raise
 
         return json.dumps({
             "success": True,
@@ -90,16 +103,6 @@ async def protect_document(
         })
 
     except Exception as e:
-        try:
-            if "original_data" in locals():
-                with open(filename, "wb") as outfile:
-                    outfile.write(original_data)
-                return json.dumps({
-                    "success": False,
-                    "error": f"Failed to encrypt: {str(e)}. Original file restored.",
-                })
-        except Exception as restore_e:
-            pass
         return json.dumps({"success": False, "error": str(e)})
 
 
@@ -418,8 +421,20 @@ async def unprotect_document(filename: str, password: str) -> str:
             decrypted_data_io = io.BytesIO()
             file.decrypt(outfile=decrypted_data_io)
 
-            with open(filename, "wb") as outfile:
-                outfile.write(decrypted_data_io.getvalue())
+            # Write to temp file first, then atomically replace
+            tmp_fd, tmp_path = tempfile.mkstemp(
+                suffix=".docx",
+                dir=os.path.dirname(os.path.abspath(filename)),
+            )
+            os.close(tmp_fd)
+            try:
+                with open(tmp_path, "wb") as tmp_file:
+                    tmp_file.write(decrypted_data_io.getvalue())
+                os.replace(tmp_path, filename)
+            except Exception:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+                raise
 
         return json.dumps({
             "success": True,
@@ -429,20 +444,10 @@ async def unprotect_document(filename: str, password: str) -> str:
 
     except msoffcrypto.exceptions.InvalidKeyError:
         return json.dumps({"success": False, "error": "密码不正确。"})
-    except msoffcrypto.exceptions.InvalidFormatError:
+    except (msoffcrypto.exceptions.FileFormatError, msoffcrypto.exceptions.DecryptionError):
         return json.dumps({
             "success": False,
             "error": "文件未加密或不是受支持的 Office 格式。",
         })
     except Exception as e:
-        try:
-            if "encrypted_data" in locals():
-                with open(filename, "wb") as outfile:
-                    outfile.write(encrypted_data)
-                return json.dumps({
-                    "success": False,
-                    "error": f"解密失败：{str(e)}。已恢复原始文件。",
-                })
-        except Exception as restore_e:
-            pass
         return json.dumps({"success": False, "error": str(e)})
