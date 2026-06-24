@@ -143,11 +143,11 @@ These work on Windows, macOS, and Linux using python-docx. The document file mus
 
 | Tool | Description |
 |------|-------------|
-| `protect_document` | Add password protection |
-| `unprotect_document` | Remove protection |
-| `add_restricted_editing` | Restrict editing to specific sections |
-| `add_digital_signature` | Add a digital signature |
-| `verify_document` | Verify protection and signatures |
+| `protect_document` | Add password encryption (msoffcrypto-tool) |
+| `unprotect_document` | Remove password encryption |
+| `add_restricted_editing` | Restrict editing with OOXML document protection (Word-enforced) |
+| `add_signature_block` | Add a visible signature block + Word Signature Line shape (non-cryptographic) |
+| `verify_document` | Verify protection status, encryption, and signature lines |
 
 </details>
 

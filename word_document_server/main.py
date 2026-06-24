@@ -464,9 +464,16 @@ def register_tools():
             destructiveHint=True,
         ),
     )
-    def protect_document(filename: str, password: str):
-        """Add password protection to a Word document."""
-        return protection_tools.protect_document(filename, password)
+    def protect_document(filename: str, password: str, confirm_password: str = None):
+        """Add password protection (encryption) to a Word document.
+
+        The password is NOT stored anywhere — it is discarded after
+        encryption.  Make sure to remember it.
+
+        Include confirm_password for extra safety: the LLM asks the user
+        to type the password twice and passes both; they must match.
+        """
+        return protection_tools.protect_document(filename, password, confirm_password)
     
     @mcp.tool(
         annotations=ToolAnnotations(
@@ -1915,13 +1922,29 @@ def register_tools():
 
     @mcp.tool(
         annotations=ToolAnnotations(
-            title="Add Digital Signature",
+            title="Add Signature Block",
             destructiveHint=True,
         ),
     )
-    def add_digital_signature(filename: str, signer_name: str, reason: str = None):
-        """Add a digital signature to a Word document."""
-        return protection_tools.add_digital_signature(filename, signer_name, reason)
+    def add_signature_block(filename: str, signer_name: str,
+                            title: str = None, reason: str = None,
+                            location: str = None, show_date: bool = True):
+        """Add a visible signature block to a Word document.
+
+        Cross-platform: inserts a formal text signature block (separator,
+        signer name, title, date, location, signature line).
+
+        Windows + COM: additionally creates a native Word Signature Line
+        shape that the recipient can double-click to sign.
+
+        NOTE: This is a signature placeholder, not a cryptographic
+        PKI/X.509 digital signature.
+        """
+        return protection_tools.add_signature_block(
+            filename, signer_name,
+            title=title, reason=reason,
+            location=location, show_date=show_date,
+        )
 
     @mcp.tool(
         annotations=ToolAnnotations(
@@ -1930,7 +1953,7 @@ def register_tools():
         ),
     )
     def verify_document(filename: str, password: str = None):
-        """Verify document protection and/or digital signature."""
+        """Verify document protection status (restricted editing, encryption, signature lines)."""
         return protection_tools.verify_document(filename, password)
 
 

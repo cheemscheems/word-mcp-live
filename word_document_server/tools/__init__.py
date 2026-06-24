@@ -27,7 +27,7 @@ from word_document_server.tools.format_tools import (
 # Protection tools
 from word_document_server.tools.protection_tools import (
     protect_document, add_restricted_editing,
-    add_digital_signature, verify_document
+    add_signature_block, verify_document
 )
 
 # Footnote tools
