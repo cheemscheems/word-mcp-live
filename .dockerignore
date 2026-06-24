@@ -1,3 +1,7 @@
+# ── Git / CI ────────────────────────────────────────────────────────
+.git/
+.github/
+
 # ── Secrets / local config ──────────────────────────────────────────
 .env
 .env.*
@@ -19,7 +23,6 @@ word_mcp_captures/
 
 # ── Python / build ─────────────────────────────────────────────────
 __pycache__/
-*.py[oc]
 *.pyc
 .venv/
 build/
@@ -28,6 +31,10 @@ wheels/
 *.egg-info/
 *.mcpb
 
-# ── IDE / system ───────────────────────────────────────────────────
-.idea/
-.DS_Store
+# ── Tests / docs not needed at runtime ─────────────────────────────
+tests/
+*.md
+LICENSE
+CHANGELOG.md
+CONTRIBUTING.md
+TOOLS.md
