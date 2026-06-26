@@ -8,7 +8,7 @@ Reference: Anthropic docx skill scripts/comment.py
 """
 
 import copy
-from word_document_server.defaults import DEFAULT_AUTHOR, DEFAULT_INITIALS
+from word_mcp_live_cheemscheems.defaults import DEFAULT_AUTHOR, DEFAULT_INITIALS
 import random
 import zipfile
 from datetime import datetime, timezone

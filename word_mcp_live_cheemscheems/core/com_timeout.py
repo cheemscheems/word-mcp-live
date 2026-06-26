@@ -7,7 +7,7 @@ utility that runs a COM operation in a **background thread** (where
 
 Usage::
 
-    from word_document_server.core.com_timeout import com_call, ComTimeoutError
+    from word_mcp_live_cheemscheems.core.com_timeout import com_call, ComTimeoutError
 
     # Wrap a single COM method call (use a lambda)
     result = await com_call(lambda: doc.Save(), timeout=30)

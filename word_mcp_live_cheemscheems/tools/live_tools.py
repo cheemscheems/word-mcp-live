@@ -10,7 +10,7 @@ import re
 import sys
 import time
 
-from word_document_server.defaults import DEFAULT_AUTHOR
+from word_mcp_live_cheemscheems.defaults import DEFAULT_AUTHOR
 # macOS JXA dispatch
 _MAC_AVAILABLE = __import__('sys').platform == 'darwin'
 
@@ -49,14 +49,14 @@ async def word_live_insert_text(
         JSON with result info.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_insert_text
+        from word_mcp_live_cheemscheems.core.word_mac import mac_insert_text
         return mac_insert_text(filename=filename, text=text, position=position, bookmark=bookmark, track_changes=track_changes)
 
     if sys.platform != "win32":
         return json.dumps({"error": "Live editing is only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -68,7 +68,7 @@ async def word_live_insert_text(
         # Reject control bytes (notably \x07 cell separator) — inserting
         # these outside a real table creates invalid document state that
         # subsequent Find/Replace and table operations cannot recover from.
-        from word_document_server.utils.text_safety import reject_control_chars
+        from word_mcp_live_cheemscheems.utils.text_safety import reject_control_chars
         try:
             reject_control_chars("text", text)
         except ValueError as e:
@@ -196,14 +196,14 @@ async def word_live_format_text(
         JSON with result info.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_format_text
+        from word_mcp_live_cheemscheems.core.word_mac import mac_format_text
         return mac_format_text(filename=filename, start=start, end=end, start_paragraph=start_paragraph, end_paragraph=end_paragraph, bold=bold, italic=italic, underline=underline, strikethrough=strikethrough, font_name=font_name, font_size=font_size, font_color=font_color, highlight_color=highlight_color, style_name=style_name, paragraph_alignment=paragraph_alignment, page_break_before=page_break_before, preserve_direct_formatting=preserve_direct_formatting, track_changes=track_changes)
 
     if sys.platform != "win32":
         return json.dumps({"error": "Live editing is only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -388,7 +388,7 @@ async def word_live_apply_list(
         JSON with result info.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_apply_list
+        from word_mcp_live_cheemscheems.core.word_mac import mac_apply_list
         return mac_apply_list(
             filename=filename, start_paragraph=start_paragraph,
             end_paragraph=end_paragraph, list_type=list_type, level=level,
@@ -408,7 +408,7 @@ async def word_live_apply_list(
         end_paragraph = start_paragraph
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -580,7 +580,7 @@ async def word_live_setup_heading_numbering(
     import re
 
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_setup_heading_numbering
+        from word_mcp_live_cheemscheems.core.word_mac import mac_setup_heading_numbering
         return mac_setup_heading_numbering(
             filename=filename,
             h1_paragraphs=h1_paragraphs,
@@ -609,7 +609,7 @@ async def word_live_setup_heading_numbering(
         return json.dumps({"error": "Provide h1_paragraphs and/or h2_paragraphs"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -947,7 +947,7 @@ async def word_live_replace_text(
         JSON with count of replacements made.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_replace_text
+        from word_mcp_live_cheemscheems.core.word_mac import mac_replace_text
         return mac_replace_text(filename=filename, find_text=find_text, replace_text=replace_text, match_case=match_case, match_whole_word=match_whole_word, use_wildcards=use_wildcards, replace_all=replace_all, track_changes=track_changes)
 
     if sys.platform != "win32":
@@ -969,7 +969,7 @@ async def word_live_replace_text(
 
     # Reject control bytes (notably \x07 cell separator) that can corrupt
     # Find/Replace and have historically caused full-document data loss.
-    from word_document_server.utils.text_safety import reject_control_chars
+    from word_mcp_live_cheemscheems.utils.text_safety import reject_control_chars
     try:
         reject_control_chars("find_text", find_text)
         reject_control_chars("replace_text", replace_text)
@@ -984,7 +984,7 @@ async def word_live_replace_text(
         })
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -1111,7 +1111,7 @@ async def word_live_insert_paragraphs(
         return json.dumps({"error": f"position must be 'before' or 'after', got '{position}'"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -1221,14 +1221,14 @@ async def word_live_add_table(
         JSON with result info.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_add_table
+        from word_mcp_live_cheemscheems.core.word_mac import mac_add_table
         return mac_add_table(filename=filename, rows=rows, cols=cols, position=position, data=data, track_changes=track_changes)
 
     if sys.platform != "win32":
         return json.dumps({"error": "Live editing is only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -1384,7 +1384,7 @@ async def word_live_format_table(
         return json.dumps({"error": "Live editing is only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -1539,7 +1539,7 @@ async def word_live_delete_text(
         JSON with deleted text info.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_delete_text
+        from word_mcp_live_cheemscheems.core.word_mac import mac_delete_text
         return mac_delete_text(filename=filename, start=start, end=end, track_changes=track_changes)
 
     if sys.platform != "win32":
@@ -1551,7 +1551,7 @@ async def word_live_delete_text(
         )
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -1653,15 +1653,15 @@ async def word_live_modify_table(
         JSON with operation result.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_modify_table
+        from word_mcp_live_cheemscheems.core.word_mac import mac_modify_table
         return mac_modify_table(filename=filename, table_index=table_index, operation=operation, row=row, col=col, text=text, track_changes=track_changes)
 
     if sys.platform != "win32":
         return json.dumps({"error": "Live editing is only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
-        from word_document_server.core import table_com
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core import table_com
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -1793,7 +1793,7 @@ async def word_live_undo(
         JSON with success status and number of undone steps.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_undo
+        from word_mcp_live_cheemscheems.core.word_mac import mac_undo
         return mac_undo(filename=filename, times=times)
 
     if sys.platform != "win32":
@@ -1803,7 +1803,7 @@ async def word_live_undo(
         return json.dumps({"error": "times must be >= 1"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -1837,14 +1837,14 @@ async def word_live_save(
         JSON with save result.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_save
+        from word_mcp_live_cheemscheems.core.word_mac import mac_save
         return mac_save(filename=filename, save_as=save_as)
 
     if sys.platform != "win32":
         return json.dumps({"error": "Live editing is only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -1896,14 +1896,14 @@ async def word_live_toggle_track_changes(
         JSON with the new track changes state.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_toggle_track_changes
+        from word_mcp_live_cheemscheems.core.word_mac import mac_toggle_track_changes
         return mac_toggle_track_changes(filename=filename, enable=enable)
 
     if sys.platform != "win32":
         return json.dumps({"error": "Live editing is only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -1981,7 +1981,7 @@ async def word_live_insert_image(
         return json.dumps({"error": f"Image file not found: {abs_path}"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -2231,7 +2231,7 @@ async def word_live_insert_cross_reference(
         })
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -2311,7 +2311,7 @@ async def word_live_list_cross_reference_items(
         })
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -2500,7 +2500,7 @@ async def word_live_insert_equation(
         return json.dumps({"error": "Live editing is only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)

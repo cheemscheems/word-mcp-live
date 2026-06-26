@@ -1,6 +1,6 @@
 <div align="center">
 
-# word-mcp-live
+# word-mcp-live-cheemscheems
 
 **唯一能在 Word 打开时实时编辑文档的 MCP 服务器**
 
@@ -14,7 +14,7 @@
 
 ---
 
-word-mcp-live 让任何支持 [MCP](https://modelcontextprotocol.io/) 的 AI 助手获得对 Microsoft Word 的完全控制。打开文档，告诉 AI 你需要什么，然后看着它一步步完成——格式调整、修订标记、批注、全部实时生效。
+word-mcp-live-cheemscheems 让任何支持 [MCP](https://modelcontextprotocol.io/) 的 AI 助手获得对 Microsoft Word 的完全控制。打开文档，告诉 AI 你需要什么，然后看着它一步步完成——格式调整、修订标记、批注、全部实时生效。
 
 ## 核心特性
 
@@ -32,13 +32,13 @@ word-mcp-live 让任何支持 [MCP](https://modelcontextprotocol.io/) 的 AI 助
 ## 快速开始
 
 ```bash
-pip install word-mcp-live
+pip install word-mcp-live-cheemscheems
 ```
 
 或从源码安装：
 
 ```bash
-git clone https://github.com/ykarapazar/word-mcp-live.git
+git clone https://github.com/cheemscheems/word-mcp-live.git
 cd word-mcp-live
 pip install -e .
 ```
@@ -55,7 +55,7 @@ pip install -e .
   "mcpServers": {
     "word": {
       "command": "uvx",
-      "args": ["word-mcp-live"],
+      "args": ["word-mcp-live-cheemscheems"],
       "env": {
         "MCP_AUTHOR": "Your Name",
         "MCP_AUTHOR_INITIALS": "YN"
@@ -77,7 +77,7 @@ pip install -e .
   "mcpServers": {
     "word": {
       "command": "uvx",
-      "args": ["word-mcp-live"],
+      "args": ["word-mcp-live-cheemscheems"],
       "env": {
         "MCP_AUTHOR": "Your Name",
         "MCP_AUTHOR_INITIALS": "YN"

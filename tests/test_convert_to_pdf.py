@@ -5,7 +5,7 @@ import pytest
 from docx import Document
 
 # Target for testing: convert_to_pdf (async function)
-from word_document_server.tools.extended_document_tools import convert_to_pdf
+from word_mcp_live_cheemscheems.tools.extended_document_tools import convert_to_pdf
 
 
 def _make_sample_docx(path: Path) -> None:

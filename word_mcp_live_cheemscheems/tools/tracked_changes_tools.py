@@ -9,10 +9,10 @@ import json
 import os
 from typing import Optional
 
-from word_document_server.defaults import DEFAULT_AUTHOR
+from word_mcp_live_cheemscheems.defaults import DEFAULT_AUTHOR
 
-from word_document_server.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
-from word_document_server.core.tracked_changes import (
+from word_mcp_live_cheemscheems.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
+from word_mcp_live_cheemscheems.core.tracked_changes import (
     track_replace_in_doc,
     track_insert_in_doc,
     track_delete_in_doc,

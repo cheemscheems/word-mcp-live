@@ -21,7 +21,7 @@ def get_file_lock(filepath: str) -> asyncio.Lock:
     if sys.platform == "win32":
         path = path.casefold()
     # Track file for automatic periodic backups
-    from word_document_server.utils.backup_manager import backup_manager
+    from word_mcp_live_cheemscheems.utils.backup_manager import backup_manager
     backup_manager.track(path)
     return _file_locks.setdefault(path, asyncio.Lock())
 
@@ -97,7 +97,7 @@ def ensure_docx_extension(filename: str) -> str:
     automatic protection against path traversal and the optional
     ``MCP_ALLOWED_DIR`` sandbox.
     """
-    from word_document_server.utils.path_safety import validate_path
+    from word_mcp_live_cheemscheems.utils.path_safety import validate_path
     filename = validate_path(str(filename))
     if not filename.endswith('.docx'):
         filename += '.docx'

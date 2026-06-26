@@ -9,8 +9,8 @@ import json
 from typing import Dict, List, Optional, Any
 from docx import Document
 
-from word_document_server.utils.file_utils import ensure_docx_extension
-from word_document_server.core.comments import (
+from word_mcp_live_cheemscheems.utils.file_utils import ensure_docx_extension
+from word_mcp_live_cheemscheems.core.comments import (
     extract_all_comments,
     filter_comments_by_author,
     get_comments_for_paragraph
@@ -146,7 +146,7 @@ async def get_comments_for_paragraph(filename: str, paragraph_index: int) -> str
         all_comments = extract_all_comments(doc)
         
         # Filter for the specific paragraph
-        from word_document_server.core.comments import get_comments_for_paragraph as core_get_comments_for_paragraph
+        from word_mcp_live_cheemscheems.core.comments import get_comments_for_paragraph as core_get_comments_for_paragraph
         para_comments = core_get_comments_for_paragraph(all_comments, paragraph_index)
         
         # Get the paragraph text for context

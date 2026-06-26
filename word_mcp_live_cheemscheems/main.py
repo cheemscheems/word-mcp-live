@@ -7,7 +7,7 @@ Supports multiple transports: stdio, sse, and streamable-http using standalone F
 import os
 import sys
 from dotenv import load_dotenv
-from word_document_server.defaults import DEFAULT_AUTHOR, DEFAULT_INITIALS
+from word_mcp_live_cheemscheems.defaults import DEFAULT_AUTHOR, DEFAULT_INITIALS
 
 # Load environment variables from .env file
 print("Loading configuration from .env file...", file=sys.stderr)
@@ -16,7 +16,7 @@ load_dotenv()
 os.environ.setdefault('FASTMCP_LOG_LEVEL', 'INFO')
 from fastmcp import FastMCP
 from mcp.types import ToolAnnotations
-from word_document_server.tools import (
+from word_mcp_live_cheemscheems.tools import (
     document_tools,
     content_tools,
     format_tools,
@@ -33,8 +33,8 @@ from word_document_server.tools import (
     screen_capture_tools,
     layout_tools,
 )
-from word_document_server.tools.content_tools import replace_paragraph_block_below_header_tool
-from word_document_server.tools.content_tools import replace_block_between_manual_anchors_tool
+from word_mcp_live_cheemscheems.tools.content_tools import replace_paragraph_block_below_header_tool
+from word_mcp_live_cheemscheems.tools.content_tools import replace_block_between_manual_anchors_tool
 
 def get_transport_config():
     """
@@ -1981,15 +1981,15 @@ def run_server():
     # setup_logging(config['debug'])
     
     # Monkey-patch Document.save() to preserve comments.xml and other custom parts
-    from word_document_server.utils.save_utils import install_save_hook
+    from word_mcp_live_cheemscheems.utils.save_utils import install_save_hook
     install_save_hook()
 
     # Monkey-patch PhysPkgReader to detect Word-locked files
-    from word_document_server.utils.path_utils import install_path_hook
+    from word_mcp_live_cheemscheems.utils.path_utils import install_path_hook
     install_path_hook()
 
     # Start automatic document backup loop
-    from word_document_server.utils.backup_manager import backup_manager
+    from word_mcp_live_cheemscheems.utils.backup_manager import backup_manager
     backup_manager.start()
 
     # Register all tools

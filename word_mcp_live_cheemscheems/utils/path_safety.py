@@ -7,7 +7,7 @@ the server only ever touches files under a single directory tree.
 
 Usage::
 
-    from word_document_server.utils.path_safety import validate_path
+    from word_mcp_live_cheemscheems.utils.path_safety import validate_path
 
     safe = validate_path(user_input)
     doc = Document(safe)
@@ -82,7 +82,7 @@ def validate_docx_path(filename: str) -> str:
     followed by ``validate_path``, used by tools that need to ensure
     the path ends with ``.docx``.
     """
-    from word_document_server.utils.file_utils import ensure_docx_extension
+    from word_mcp_live_cheemscheems.utils.file_utils import ensure_docx_extension
 
     filename = ensure_docx_extension(filename)
     return validate_path(filename)

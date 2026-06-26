@@ -14,8 +14,8 @@ from docx import Document
 from docx.shared import Pt
 from docx.enum.style import WD_STYLE_TYPE
 
-from word_document_server.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
-from word_document_server.core.footnotes import (
+from word_mcp_live_cheemscheems.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
+from word_mcp_live_cheemscheems.core.footnotes import (
     find_footnote_references,
     get_format_symbols,
     customize_footnote_formatting,

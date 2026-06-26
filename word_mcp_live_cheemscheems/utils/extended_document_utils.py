@@ -4,7 +4,7 @@ Extended document utilities for Word Document Server.
 from typing import Dict, List, Any, Tuple
 from docx import Document
 
-from word_document_server.utils.document_utils import get_effective_text
+from word_mcp_live_cheemscheems.utils.document_utils import get_effective_text
 
 
 def get_paragraph_text(doc_path: str, paragraph_index: int) -> Dict[str, Any]:

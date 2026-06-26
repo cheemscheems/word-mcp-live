@@ -5,7 +5,7 @@ Thanks for your interest in contributing! This guide covers the basics of settin
 ## Development Setup
 
 ```bash
-git clone https://github.com/ykarapazar/word-mcp-live.git
+git clone https://github.com/cheemscheems/word-mcp-live.git
 cd word-mcp-live
 pip install -e ".[dev]"
 ```

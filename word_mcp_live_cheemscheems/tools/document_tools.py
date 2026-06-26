@@ -6,9 +6,9 @@ import json
 from typing import Dict, List, Optional, Any
 from docx import Document
 
-from word_document_server.utils.file_utils import check_file_writeable, ensure_docx_extension, create_document_copy
-from word_document_server.utils.document_utils import get_document_properties, extract_document_text, get_document_structure, get_document_xml, insert_header_near_text, insert_line_or_paragraph_near_text
-from word_document_server.core.styles import ensure_heading_style, ensure_table_style
+from word_mcp_live_cheemscheems.utils.file_utils import check_file_writeable, ensure_docx_extension, create_document_copy
+from word_mcp_live_cheemscheems.utils.document_utils import get_document_properties, extract_document_text, get_document_structure, get_document_xml, insert_header_near_text, insert_line_or_paragraph_near_text
+from word_mcp_live_cheemscheems.core.styles import ensure_heading_style, ensure_table_style
 
 
 async def create_document(filename: str, title: Optional[str] = None, author: Optional[str] = None) -> str:
@@ -100,7 +100,7 @@ async def list_available_documents(directory: str = ".") -> str:
         directory: Directory to search for Word documents
     """
     try:
-        from word_document_server.utils.path_safety import validate_path
+        from word_mcp_live_cheemscheems.utils.path_safety import validate_path
 
         safe_dir = validate_path(directory)
 
@@ -152,7 +152,7 @@ async def merge_documents(target_filename: str, source_filenames: List[str], add
         source_filenames: List of paths to source documents to merge
         add_page_breaks: If True, add page breaks between documents
     """
-    from word_document_server.core.tables import copy_table
+    from word_mcp_live_cheemscheems.core.tables import copy_table
     
     target_filename = ensure_docx_extension(target_filename)
     
@@ -235,7 +235,7 @@ async def backup_document(filename: str, note: str = None) -> str:
         note:     Optional note describing why the backup was created.
     """
     import json
-    from word_document_server.utils.backup_manager import backup_manager
+    from word_mcp_live_cheemscheems.utils.backup_manager import backup_manager
 
     result = backup_manager.create_backup(filename, note=note or "")
     return json.dumps(result, ensure_ascii=False)

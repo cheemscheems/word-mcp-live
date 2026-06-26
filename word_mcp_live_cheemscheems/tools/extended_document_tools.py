@@ -12,8 +12,8 @@ import tempfile
 from typing import Dict, List, Optional, Any, Union, Tuple
 from docx import Document
 
-from word_document_server.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
-from word_document_server.utils.extended_document_utils import get_paragraph_text, find_text, get_highlighted_text
+from word_mcp_live_cheemscheems.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
+from word_mcp_live_cheemscheems.utils.extended_document_utils import get_paragraph_text, find_text, get_highlighted_text
 
 
 async def get_paragraph_text_from_document(filename: str, paragraph_index: int) -> str:
@@ -149,7 +149,7 @@ async def convert_to_pdf(filename: str, output_filename: Optional[str] = None) -
                 # --- Attempt 0 (macOS only): JXA save-as-PDF from open document ---
                 if system == "Darwin":
                     try:
-                        from word_document_server.core.word_mac import mac_save_as_pdf
+                        from word_mcp_live_cheemscheems.core.word_mac import mac_save_as_pdf
                         result_json = mac_save_as_pdf(filename=filename, output_path=output_filename)
                         import json as _json
                         result_data = _json.loads(result_json)

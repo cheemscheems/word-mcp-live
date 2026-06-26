@@ -8,7 +8,7 @@ support tracked changes natively, so we work directly with the XML.
 Reference: Anthropic docx skill SKILL.md tracked changes patterns.
 """
 
-from word_document_server.defaults import DEFAULT_AUTHOR
+from word_mcp_live_cheemscheems.defaults import DEFAULT_AUTHOR
 
 import copy
 import json

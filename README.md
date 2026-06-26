@@ -2,13 +2,13 @@
 
 [![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=word&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJ3b3JkLW1jcC1saXZlIl19)
 
-# word-mcp-live
+# word-mcp-live-cheemscheems
 
 **The only MCP server that edits Word documents while they're open**
 
 `Live editing` &middot; `Tracked changes` &middot; `Per-action undo` &middot; `124 tools` &middot; `Cross-platform`
 
-[![PyPI](https://img.shields.io/pypi/v/word-mcp-live?color=blue)](https://pypi.org/project/word-mcp-live/)
+[![PyPI](https://img.shields.io/pypi/v/word-mcp-live-cheemscheems?color=blue)](https://pypi.org/project/word-mcp-live-cheemscheems/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform: Windows + macOS/Linux](https://img.shields.io/badge/platform-Windows%20%2B%20macOS%2FLinux-lightgrey)]()
@@ -17,13 +17,13 @@
 
 ---
 
-word-mcp-live gives any AI assistant that supports [MCP](https://modelcontextprotocol.io/) full control of Microsoft Word. Open a document, tell the AI what you need, and watch it happen — formatting, tracked changes, comments, and all. Changes appear live in your open document.
+word-mcp-live-cheemscheems gives any AI assistant that supports [MCP](https://modelcontextprotocol.io/) full control of Microsoft Word. Open a document, tell the AI what you need, and watch it happen — formatting, tracked changes, comments, and all. Changes appear live in your open document.
 
 <table>
 <tr>
 <td width="50%">
 
-### Without word-mcp-live
+### Without word-mcp-live-cheemscheems
 
 - AI can discuss your document but can't touch it
 - You copy-paste between AI and Word, losing formatting
@@ -33,7 +33,7 @@ word-mcp-live gives any AI assistant that supports [MCP](https://modelcontextpro
 </td>
 <td width="50%">
 
-### With word-mcp-live
+### With word-mcp-live-cheemscheems
 
 - "Add a tracked change replacing ABC Corp with XYZ Ltd" — done
 - Changes appear live in your open Word document
@@ -65,13 +65,13 @@ https://github.com/user-attachments/assets/fbb09af4-1e25-4e49-94d0-45b363278810
 ## Quick Start
 
 ```bash
-pip install word-mcp-live
+pip install word-mcp-live-cheemscheems
 ```
 
 Or install from source:
 
 ```bash
-git clone https://github.com/ykarapazar/word-mcp-live.git
+git clone https://github.com/cheemscheems/word-mcp-live.git
 cd word-mcp-live
 pip install -e .
 ```
@@ -88,7 +88,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "word": {
       "command": "uvx",
-      "args": ["word-mcp-live"],
+      "args": ["word-mcp-live-cheemscheems"],
       "env": {
         "MCP_AUTHOR": "Your Name",
         "MCP_AUTHOR_INITIALS": "YN"
@@ -110,7 +110,7 @@ Add to your `.mcp.json`:
   "mcpServers": {
     "word": {
       "command": "uvx",
-      "args": ["word-mcp-live"],
+      "args": ["word-mcp-live-cheemscheems"],
       "env": {
         "MCP_AUTHOR": "Your Name",
         "MCP_AUTHOR_INITIALS": "YN"
@@ -134,7 +134,7 @@ Add to your `.mcp.json`:
   "mcpServers": {
     "word": {
       "command": "uvx",
-      "args": ["word-mcp-live"],
+      "args": ["word-mcp-live-cheemscheems"],
       "env": {
         "MCP_AUTHOR": "Your Name",
         "MCP_AUTHOR_INITIALS": "YN"
@@ -149,7 +149,7 @@ Add to your `.mcp.json`:
 <details>
 <summary><b>VS Code / Copilot</b></summary>
 
-**One-click:** [Install in VS Code](vscode:mcp/install?%7B%22name%22%3A%20%22word%22%2C%20%22command%22%3A%20%22uvx%22%2C%20%22args%22%3A%20%5B%22word-mcp-live%22%5D%7D)
+**One-click:** [Install in VS Code](vscode:mcp/install?%7B%22name%22%3A%20%22word%22%2C%20%22command%22%3A%20%22uvx%22%2C%20%22args%22%3A%20%5B%22word-mcp-live-cheemscheems%22%5D%7D)
 
 **Manual:** Add to your VS Code `settings.json`:
 
@@ -159,7 +159,7 @@ Add to your `.mcp.json`:
     "servers": {
       "word": {
         "command": "uvx",
-        "args": ["word-mcp-live"],
+        "args": ["word-mcp-live-cheemscheems"],
         "env": {
           "MCP_AUTHOR": "Your Name",
           "MCP_AUTHOR_INITIALS": "YN"
@@ -182,7 +182,7 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
   "mcpServers": {
     "word": {
       "command": "uvx",
-      "args": ["word-mcp-live"],
+      "args": ["word-mcp-live-cheemscheems"],
       "env": {
         "MCP_AUTHOR": "Your Name",
         "MCP_AUTHOR_INITIALS": "YN"
@@ -202,7 +202,7 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
   "mcpServers": {
     "word": {
       "command": "docker",
-      "args": ["run", "-i", "--rm", "ghcr.io/ykarapazar/word-mcp-live"],
+      "args": ["run", "-i", "--rm", "ghcr.io/cheemscheems/word-mcp-live"],
       "env": {
         "MCP_AUTHOR": "Your Name",
         "MCP_AUTHOR_INITIALS": "YN"
@@ -363,8 +363,8 @@ The comment appears in Word's Review panel, anchored to the specified text.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, and how to add new tools.
 
-Found a bug? [Open an issue](https://github.com/ykarapazar/word-mcp-live/issues/new?template=bug_report.md).
-Have an idea? [Request a feature](https://github.com/ykarapazar/word-mcp-live/issues/new?template=feature_request.md).
+Found a bug? [Open an issue](https://github.com/cheemscheems/word-mcp-live/issues/new?template=bug_report.md).
+Have an idea? [Request a feature](https://github.com/cheemscheems/word-mcp-live/issues/new?template=feature_request.md).
 
 ## Acknowledgments
 
@@ -378,9 +378,9 @@ This server runs entirely on your local machine. No data is collected, transmitt
 
 ## Support
 
-- **Bug reports:** [Open an issue](https://github.com/ykarapazar/word-mcp-live/issues/new?template=bug_report.md)
-- **Feature requests:** [Request a feature](https://github.com/ykarapazar/word-mcp-live/issues/new?template=feature_request.md)
-- **Discussions:** [GitHub Discussions](https://github.com/ykarapazar/word-mcp-live/discussions)
+- **Bug reports:** [Open an issue](https://github.com/cheemscheems/word-mcp-live/issues/new?template=bug_report.md)
+- **Feature requests:** [Request a feature](https://github.com/cheemscheems/word-mcp-live/issues/new?template=feature_request.md)
+- **Discussions:** [GitHub Discussions](https://github.com/cheemscheems/word-mcp-live/discussions)
 
 ## License
 
@@ -402,12 +402,12 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ## Star History
 
-<a href="https://star-history.com/#ykarapazar/word-mcp-live&Date">
+<a href="https://star-history.com/#cheemscheems/word-mcp-live&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=ykarapazar/word-mcp-live&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=ykarapazar/word-mcp-live&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=ykarapazar/word-mcp-live&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=cheemscheems/word-mcp-live&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=cheemscheems/word-mcp-live&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=cheemscheems/word-mcp-live&type=Date" />
  </picture>
 </a>
 
-<!-- mcp-name: io.github.ykarapazar/word-mcp-live -->
+<!-- mcp-name: io.github.cheemscheems/word-mcp-live -->

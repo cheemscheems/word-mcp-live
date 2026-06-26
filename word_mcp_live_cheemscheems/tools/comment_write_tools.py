@@ -7,9 +7,9 @@ These tools provide MCP interfaces for adding comments to Word documents.
 import json
 import os
 
-from word_document_server.defaults import DEFAULT_AUTHOR, DEFAULT_INITIALS
-from word_document_server.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
-from word_document_server.core.comment_writer import add_comment_to_doc
+from word_mcp_live_cheemscheems.defaults import DEFAULT_AUTHOR, DEFAULT_INITIALS
+from word_mcp_live_cheemscheems.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
+from word_mcp_live_cheemscheems.core.comment_writer import add_comment_to_doc
 
 
 async def add_comment(

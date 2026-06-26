@@ -2,7 +2,7 @@
 
 Usage::
 
-    from word_document_server.utils.backup_manager import backup_manager
+    from word_mcp_live_cheemscheems.utils.backup_manager import backup_manager
 
     # On-demand backup (call before destructive operations)
     result = backup_manager.create_backup("document.docx",

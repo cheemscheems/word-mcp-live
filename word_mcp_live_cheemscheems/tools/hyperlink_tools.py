@@ -8,8 +8,8 @@ import json
 import os
 from typing import Optional
 
-from word_document_server.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
-from word_document_server.core.hyperlink_writer import add_hyperlink_to_doc
+from word_mcp_live_cheemscheems.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
+from word_mcp_live_cheemscheems.core.hyperlink_writer import add_hyperlink_to_doc
 
 
 async def manage_hyperlinks(

@@ -9,11 +9,11 @@ from typing import List, Optional, Dict, Any
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 
-from word_document_server.utils.document_utils import get_effective_text
+from word_mcp_live_cheemscheems.utils.document_utils import get_effective_text
 
-from word_document_server.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
-from word_document_server.utils.document_utils import find_and_replace_text, insert_header_near_text, insert_numbered_list_near_text, insert_line_or_paragraph_near_text, replace_paragraph_block_below_header, replace_block_between_manual_anchors
-from word_document_server.core.styles import ensure_heading_style, ensure_table_style
+from word_mcp_live_cheemscheems.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
+from word_mcp_live_cheemscheems.utils.document_utils import find_and_replace_text, insert_header_near_text, insert_numbered_list_near_text, insert_line_or_paragraph_near_text, replace_paragraph_block_below_header, replace_block_between_manual_anchors
+from word_mcp_live_cheemscheems.core.styles import ensure_heading_style, ensure_table_style
 
 
 async def add_heading(filename: str, text: str, level: int = 1,

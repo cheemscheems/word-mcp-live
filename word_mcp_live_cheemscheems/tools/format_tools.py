@@ -9,13 +9,13 @@ from typing import List, Optional, Dict, Any
 from docx import Document
 from docx.shared import Pt, RGBColor
 
-from word_document_server.utils.document_utils import get_effective_text
+from word_mcp_live_cheemscheems.utils.document_utils import get_effective_text
 from docx.enum.text import WD_COLOR_INDEX
 from docx.enum.style import WD_STYLE_TYPE
 
-from word_document_server.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
-from word_document_server.core.styles import create_style
-from word_document_server.core.tables import (
+from word_mcp_live_cheemscheems.utils.file_utils import check_file_writeable, ensure_docx_extension, get_file_lock
+from word_mcp_live_cheemscheems.core.styles import create_style
+from word_mcp_live_cheemscheems.core.tables import (
     apply_table_style, set_cell_shading_by_position, apply_alternating_row_shading,
     highlight_header_row, merge_cells, merge_cells_horizontal, merge_cells_vertical,
     set_cell_alignment_by_position, set_table_alignment, set_column_width_by_position,

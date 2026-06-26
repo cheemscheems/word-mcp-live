@@ -16,12 +16,12 @@ from docx import Document
 from docx.oxml.shared import OxmlElement, qn
 import msoffcrypto
 
-from word_document_server.utils.file_utils import (
+from word_mcp_live_cheemscheems.utils.file_utils import (
     check_file_writeable,
     ensure_docx_extension,
     get_file_lock,
 )
-from word_document_server.core.document_protection import (
+from word_mcp_live_cheemscheems.core.document_protection import (
     add_restricted_editing_protection,
     remove_restricted_editing_protection,
     has_document_protection,
@@ -266,7 +266,7 @@ async def add_signature_block(
             # ── Windows COM: native Signature Line shape ────────────────
             if sys.platform == "win32":
                 try:
-                    from word_document_server.core.word_com import (
+                    from word_mcp_live_cheemscheems.core.word_com import (
                         get_word_app,
                         find_document,
                         undo_record,
@@ -346,7 +346,7 @@ async def verify_document(filename: str, password: Optional[str] = None) -> str:
         # 2. Check COM signature lines
         if sys.platform == "win32":
             try:
-                from word_document_server.core.word_com import get_word_app, find_document
+                from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document
 
                 app = get_word_app()
                 wdoc = find_document(app, filename)

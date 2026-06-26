@@ -43,14 +43,14 @@ async def word_live_set_page_layout(
         JSON with result info.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_set_page_layout
+        from word_mcp_live_cheemscheems.core.word_mac import mac_set_page_layout
         return mac_set_page_layout(filename=filename, section_index=section_index, orientation=orientation, page_width=page_width, page_height=page_height, top_margin=top_margin, bottom_margin=bottom_margin, left_margin=left_margin, right_margin=right_margin)
 
     if sys.platform != "win32":
         return json.dumps({"error": "Live layout tools are only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -125,14 +125,14 @@ async def word_live_add_header_footer(
         JSON with result info.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_add_header_footer
+        from word_mcp_live_cheemscheems.core.word_mac import mac_add_header_footer
         return mac_add_header_footer(filename=filename, section_index=section_index, header_text=header_text, footer_text=footer_text)
 
     if sys.platform != "win32":
         return json.dumps({"error": "Live layout tools are only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -207,7 +207,7 @@ async def word_live_add_page_numbers(
         return json.dumps({"error": "Live layout tools are only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -289,14 +289,14 @@ async def word_live_add_section_break(
         JSON with result info.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_add_section_break
+        from word_mcp_live_cheemscheems.core.word_mac import mac_add_section_break
         return mac_add_section_break(filename=filename, break_type=break_type)
 
     if sys.platform != "win32":
         return json.dumps({"error": "Live layout tools are only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -367,14 +367,14 @@ async def word_live_set_paragraph_spacing(
         JSON with count of affected paragraphs.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_set_paragraph_spacing
+        from word_mcp_live_cheemscheems.core.word_mac import mac_set_paragraph_spacing
         return mac_set_paragraph_spacing(filename=filename, paragraph_index=paragraph_index, start_paragraph=start_paragraph, end_paragraph=end_paragraph, space_before=space_before_pt, space_after=space_after_pt, line_spacing=line_spacing, keep_with_next=keep_with_next, keep_together=keep_together, alignment=alignment)
 
     if sys.platform != "win32":
         return json.dumps({"error": "Live layout tools are only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -451,7 +451,7 @@ async def word_live_add_bookmark(
         JSON with result info.
     """
     if _MAC_AVAILABLE:
-        from word_document_server.core.word_mac import mac_add_bookmark
+        from word_mcp_live_cheemscheems.core.word_mac import mac_add_bookmark
         return mac_add_bookmark(filename=filename, paragraph_index=paragraph_index, bookmark_name=bookmark_name)
 
     if sys.platform != "win32":
@@ -461,7 +461,7 @@ async def word_live_add_bookmark(
         return json.dumps({"error": "bookmark_name is required"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
@@ -514,7 +514,7 @@ async def word_live_add_watermark(
         return json.dumps({"error": "Live layout tools are only available on Windows"})
 
     try:
-        from word_document_server.core.word_com import get_word_app, find_document, undo_record
+        from word_mcp_live_cheemscheems.core.word_com import get_word_app, find_document, undo_record
 
         app = get_word_app()
         doc = find_document(app, filename)
