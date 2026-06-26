@@ -2025,11 +2025,23 @@ def run_server():
                 file=sys.stderr,
             )
             print(
-                "  Set WORD_MCP_LIVE_API_KEY=<secret> in .env or as environment variable.",
+                "  To enable authentication:",
                 file=sys.stderr,
             )
             print(
-                "  To disable auth (local/dev only), set WORD_MCP_LIVE_INSECURE=true.",
+                '    export WORD_MCP_LIVE_API_KEY="your-secret-key"',
+                file=sys.stderr,
+            )
+            print(
+                "    (or add WORD_MCP_LIVE_API_KEY=your-secret-key to .env)",
+                file=sys.stderr,
+            )
+            print(
+                "  To disable auth (local/dev only):",
+                file=sys.stderr,
+            )
+            print(
+                '    export WORD_MCP_LIVE_INSECURE=true',
                 file=sys.stderr,
             )
             sys.exit(1)
