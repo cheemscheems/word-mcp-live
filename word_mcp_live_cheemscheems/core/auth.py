@@ -12,11 +12,10 @@ The key can also be placed in a ``.env`` file in the project root
 (``load_dotenv()`` is called at startup in *main.py*).
 """
 
+import json
 import os
 
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 WORD_MCP_LIVE_API_KEY: str | None = os.environ.get("WORD_MCP_LIVE_API_KEY")
 _API_KEY_SET = bool(WORD_MCP_LIVE_API_KEY)
@@ -37,35 +36,47 @@ def is_insecure_mode() -> bool:
 
 
 def auth_required_for_http() -> bool:
-    """Return ``True`` if HTTP/SSE transport must have authentication.
-
-    When ``True``, the server should refuse to start in HTTP/SSE mode
-    without a valid ``WORD_MCP_LIVE_API_KEY`` (unless insecure mode is
-    explicitly enabled).
-    """
+    """Return ``True`` if HTTP/SSE transport must have authentication."""
     return not _API_KEY_SET and not _INSECURE
 
 
-class BearerTokenMiddleware(BaseHTTPMiddleware):
-    """Starlette ASGI middleware validating ``Authorization: Bearer <key>``.
+class BearerTokenMiddleware:
+    """Pure ASGI middleware validating ``Authorization: Bearer <key>``.
 
-    Checks:
-    - ``WORD_MCP_LIVE_API_KEY`` set → requires matching Bearer token
-    - ``WORD_MCP_LIVE_INSECURE=true`` → passes all requests through
-    - Neither → 401 (backstop; server startup should already reject this)
+    This is a low-level ASGI middleware (not Starlette's
+    ``BaseHTTPMiddleware``) so it works correctly with SSE streaming
+    responses and other non-standard ASGI message sequences.
     """
 
-    async def dispatch(self, request: Request, call_next):
-        if not _API_KEY_SET:
-            return await call_next(request)
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
 
-        auth_header = request.headers.get("Authorization", "")
-        expected = f"Bearer {WORD_MCP_LIVE_API_KEY}"
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        # Only intercept HTTP requests; let WebSocket/other pass through
+        if not _API_KEY_SET or scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
 
-        if auth_header != expected:
-            return JSONResponse(
-                {"error": f"未授权。请提供有效的 WORD_MCP_LIVE_API_KEY。"},
-                status_code=401,
-            )
+        # Extract Authorization header from ASGI scope
+        auth_header = ""
+        for name, value in scope.get("headers", []):
+            if name == b"authorization":
+                auth_header = value.decode("utf-8")
+                break
 
-        return await call_next(request)
+        if auth_header != f"Bearer {WORD_MCP_LIVE_API_KEY}":
+            body = json.dumps(
+                {"error": "未授权。请提供有效的 WORD_MCP_LIVE_API_KEY。"}
+            ).encode("utf-8")
+            await send({
+                "type": "http.response.start",
+                "status": 401,
+                "headers": [(b"content-type", b"application/json")],
+            })
+            await send({
+                "type": "http.response.body",
+                "body": body,
+            })
+            return
+
+        await self.app(scope, receive, send)
