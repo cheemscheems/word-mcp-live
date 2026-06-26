@@ -2013,17 +2013,31 @@ def run_server():
         from starlette.middleware import Middleware
         from word_mcp_live_cheemscheems.core.auth import (
             BearerTokenMiddleware,
+            auth_required_for_http,
             is_auth_enabled,
+            is_insecure_mode,
         )
 
-        if not is_auth_enabled():
+        # Enforce auth by default for HTTP/SSE transport.
+        if auth_required_for_http():
             print(
-                "Warning: WORD_MCP_LIVE_API_KEY is not set. "
-                "HTTP/SSE transport has no authentication.",
+                "ERROR: WORD_MCP_LIVE_API_KEY is required for HTTP/SSE transport.",
                 file=sys.stderr,
             )
             print(
-                "  Set WORD_MCP_LIVE_API_KEY in .env or as environment variable.",
+                "  Set WORD_MCP_LIVE_API_KEY=<secret> in .env or as environment variable.",
+                file=sys.stderr,
+            )
+            print(
+                "  To disable auth (local/dev only), set WORD_MCP_LIVE_INSECURE=true.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        if is_insecure_mode():
+            print(
+                "WARNING: Running in insecure mode (no authentication). "
+                "Set WORD_MCP_LIVE_API_KEY for production use.",
                 file=sys.stderr,
             )
 
